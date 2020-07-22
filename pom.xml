@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.solace.connector</groupId>
+	<artifactId>solace-mulesoft-connector</artifactId>
+	<version>0.3.2-SNAPSHOT</version>
+	<packaging>mule-extension</packaging>
+	<name>Solace-Extension</name>
+	<properties>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.release>8</maven.compiler.release>
+	</properties>
+	<parent>
+		<groupId>org.mule.extensions</groupId>
+		<artifactId>mule-modules-parent</artifactId>
+		<version>1.1.3</version>
+	</parent>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<version>3.4.0</version>
+				<extensions>false</extensions>
+				<configuration>
+					<sharedLibraries>
+						<sharedLibrary>
+							<groupId>com.solacesystems</groupId>
+							<artifactId>sol-jcsmp</artifactId>
+						</sharedLibrary>
+					</sharedLibraries>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>com.solacesystems</groupId>
+			<artifactId>sol-jcsmp</artifactId>
+			<version>10.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>1.14.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.solace.connector</groupId>
+			<artifactId>mule-pubsubplus-container-module</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<!-- <type>mule-extension</type> -->
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.module</groupId>
+			<artifactId>mule-java-module</artifactId>
+			<version>1.2.6</version>
+			<classifier>mule-plugin</classifier>
+			<scope>provided</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>29.0-jre</version>
+		</dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.10</version>
+</dependency>
+
+	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<id>myMavenRepo.write</id>
+			<url>${myMavenRepo.write.url}</url>
+		</repository>
+		<snapshotRepository>
+			<id>myMavenRepo.write</id>
+			<url>${myMavenRepo.write.url}</url>
+		</snapshotRepository>
+	</distributionManagement>
+</project>

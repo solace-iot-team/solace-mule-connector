@@ -1,0 +1,289 @@
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:solace="http://www.mulesoft.org/schema/mule/solace"
+	xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:pubsubplus-container="http://www.mulesoft.org/schema/mule/pubsubplus-container"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+      	  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+      	  http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+      	  http://www.mulesoft.org/schema/mule/pubsubplus-container http://www.mulesoft.org/schema/mule/pubsubplus-container/current/mule-pubsubplus-container.xsd
+          http://www.mulesoft.org/schema/mule/solace http://www.mulesoft.org/schema/mule/solace/current/mule-solace.xsd">
+	<pubsubplus-container:config
+		name="containerConfig" />
+
+	<solace:config name="config">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+	<solace:config name="listener-config"
+		ackMode="MANUAL_CLIENT">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+
+
+	<flow name="publishPersistentQueueMissingFlow">
+		<try>
+			<logger message="Publish persistent." level="INFO" />
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="Q/missing" endpoint-type="QUEUE">
+				<solace:message>
+					<solace:body>hello persistent</solace:body>
+				</solace:message>
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger message="Publish persistent done." level="INFO" />
+	</flow>
+	<flow name="publishPersistentTopicFlow">
+		<try>
+			<logger message="Publish persistent." level="INFO" />
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="topic/persistent/messaging"
+				endpoint-type="TOPIC">
+				<solace:message>
+
+					<solace:body>hello topic persistent</solace:body>
+				</solace:message>
+
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger message="Publish persistent done." level="INFO" />
+	</flow>
+
+	<flow name="publishPersistentAutoProvisionFlow">
+		<try>
+			<logger message="Publish persistent." level="INFO" />
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="Q/autoprovision" endpoint-type="QUEUE"
+				provisionQueue="true">
+				<solace:message>
+					<solace:body>hello persistent</solace:body>
+				</solace:message>
+
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger message="Publish persistent done." level="INFO" />
+	</flow>
+
+	<flow name="consumeSuccessFlow">
+		<try>
+			<logger message="Publish persistent." level="INFO" />
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="Q/consumesuccess"
+				endpoint-type="QUEUE" provisionQueue="true">
+				<solace:message>
+
+					<solace:body>hello consume operation</solace:body>
+				</solace:message>
+
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<try>
+			<logger message="Consume" level="INFO" />
+			<solace:consume config-ref="config"
+				endpoint="Q/consumesuccess" endpoint-type="QUEUE" timeOut="1000"
+				timeUnit="MILLISECONDS" />
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<logger message="Publish-consume done." level="INFO" />
+	</flow>
+
+	<flow name="consumeTimeOutFlow">
+		<try>
+			<logger message="Publish persistent." level="INFO" />
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="Q/consumetimeout"
+				endpoint-type="QUEUE" provisionQueue="true">
+				<solace:message>
+
+					<solace:body>hello consumer operation</solace:body>
+				</solace:message>
+
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<try>
+			<logger message="Consume" level="INFO" />
+			<solace:consume config-ref="config"
+				endpoint="Q/consumetimeout" endpoint-type="QUEUE" timeOut="1"
+				timeUnit="SECONDS" />
+			<solace:consume config-ref="config"
+				endpoint="Q/consumetimeout" endpoint-type="QUEUE" timeOut="1"
+				timeUnit="SECONDS" />
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<logger message="Publish-consume done." level="INFO" />
+	</flow>
+
+	<flow name="consumeEndpointMissingFlow">
+		<try>
+			<logger message="Consume" level="INFO" />
+			<solace:consume config-ref="config"
+				endpoint="Q/consumemissing" endpoint-type="QUEUE" timeOut="1"
+				timeUnit="SECONDS" />
+			<solace:consume config-ref="config"
+				endpoint="Q/consumemissing" endpoint-type="QUEUE" timeOut="1"
+				timeUnit="SECONDS" />
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+	</flow>
+
+	<solace:config name="responder-config">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+
+
+	<flow name="requestReplyGuaranteedSuccessFlow">
+		<try>
+			<logger message="RR Guaranteed" level="INFO" />
+			<solace:request-reply-guaranteed
+				config-ref="config" endpoint="Q/request-reply-q"
+				endpoint-type="QUEUE" timeOut="2000" timeUnit="MILLISECONDS">
+				<solace:message>
+					<solace:body>hello guaranteed</solace:body>
+				</solace:message>
+			</solace:request-reply-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+	</flow>
+	<flow name="listen-source-guaranteed-responder">
+		<solace:consumer-source
+			config-ref="listener-config" endpoint="Q/request-reply-q"
+			endpoint-type="QUEUE" provisionEndpoint="true">
+		</solace:consumer-source>
+		<logger message="Echo flow triggered" level="INFO" />
+		<logger message="#[attributes.replyTo]" level="INFO" />
+		<solace:publish-guaranteed
+			config-ref="config" endpoint="#[attributes.replyTo]"
+			endpoint-type="QUEUE">
+			<solace:message>
+				<solace:body>hello echo guaranteed</solace:body>
+			</solace:message>
+		</solace:publish-guaranteed>
+	</flow>
+
+	<!-- test of topic endpoint - requires some trickery to make sure the TPE 
+		is provisioned -->
+
+	<flow name="consumer-source-test-topic">
+		<solace:consumer-source
+			config-ref="listener-config" endpoint="TPE/consumer-source"
+			endpoint-type="TOPIC" provisionEndpoint="true"
+			subscription="t/tpe/consume">
+
+		</solace:consumer-source>
+		<logger message="#[payload]" level="INFO" />
+	</flow>
+	<flow name="consumeTopicSuccessFlow">
+		<try>
+			<logger message="Publish persistent" level="INFO" />
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="t/tpe/consume" endpoint-type="TOPIC"
+				provisionQueue="false">
+				<solace:message>
+					<solace:body>hello consume operation</solace:body>
+				</solace:message>
+
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<try>
+			<logger message="Consume" level="INFO" />
+			<solace:consume config-ref="config"
+				endpoint="TPE/consumer-source" endpoint-type="TOPIC" timeOut="1000"
+				timeUnit="MILLISECONDS" subscription="t/tpe/consume" />
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<logger message="Publish-consume done." level="INFO" />
+	</flow>
+	<flow name="consumeTopicEndpointMissing">
+		<try>
+			<logger message="Consume" level="INFO" />
+			<solace:consume config-ref="config"
+				endpoint="TPE/missing" endpoint-type="TOPIC" timeOut="1000"
+				timeUnit="MILLISECONDS" subscription="t/pte/missing" />
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<logger message="Publish-consume done." level="INFO" />
+	</flow>
+
+</mule>

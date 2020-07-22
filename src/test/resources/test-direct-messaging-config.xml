@@ -1,0 +1,101 @@
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:solace="http://www.mulesoft.org/schema/mule/solace"
+	xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:pubsubplus-container="http://www.mulesoft.org/schema/mule/pubsubplus-container"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+      	  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+      	  http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+      	  http://www.mulesoft.org/schema/mule/pubsubplus-container http://www.mulesoft.org/schema/mule/pubsubplus-container/current/mule-pubsubplus-container.xsd
+          http://www.mulesoft.org/schema/mule/solace http://www.mulesoft.org/schema/mule/solace/current/mule-solace.xsd">
+	<pubsubplus-container:config
+		name="containerConfig" />
+
+	<solace:config name="config">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+	<flow name="publishTextMsgFlow">
+		<solace:publish-direct config-ref="config"
+			topic="a/b/c">
+			<solace:message>
+				<solace:body>Publish direct</solace:body>
+			</solace:message>
+		</solace:publish-direct>
+	</flow>
+
+	<flow name="requestReplyDirectTimeoutFlow">
+		<try>
+			<logger message="RR Direct" level="INFO" />
+			<solace:request-reply-direct
+				config-ref="config" topic="request/reply/direct/fails" timeOut="500"
+				timeUnit="MILLISECONDS">
+				<solace:message>
+					<solace:body>hello echo</solace:body>
+				</solace:message>
+
+			</solace:request-reply-direct>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<logger message="Publish-consume done." level="INFO" />
+	</flow>
+
+
+	<flow name="requestReplyDirectSuccessFlow">
+		<try>
+			<logger message="RR Direct" level="INFO" />
+			<solace:request-reply-direct
+				config-ref="config" topic="request/reply/direct/succeeds"
+				timeOut="20000" timeUnit="MILLISECONDS">
+				<solace:message>
+					<solace:body>hello there</solace:body>
+				</solace:message>
+			</solace:request-reply-direct>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+	</flow>
+	<solace:config name="responder-config">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+
+	<flow name="listen-source-direct-responder">
+		<solace:listener-source
+			config-ref="responder-config">
+			<solace:subscriptions>
+				<solace:subscription
+					value="request/reply/direct/succeeds" />
+			</solace:subscriptions>
+		</solace:listener-source>
+		<logger message="Echo flow triggered" level="INFO" />
+		<logger message="#[attributes.replyTo]" level="INFO" />
+		<solace:publish-direct config-ref="config"
+			topic="#[attributes.replyTo]">
+			<solace:message markReply="true"
+				correlationId="#[attributes.correlationId]">
+				<solace:body>hello echo</solace:body>
+			</solace:message>
+		</solace:publish-direct>
+
+	</flow>
+
+
+
+</mule>

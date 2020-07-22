@@ -1,0 +1,378 @@
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:solace="http://www.mulesoft.org/schema/mule/solace"
+	xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:pubsubplus-container="http://www.mulesoft.org/schema/mule/pubsubplus-container"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+      	  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+      	  http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+      	  http://www.mulesoft.org/schema/mule/pubsubplus-container http://www.mulesoft.org/schema/mule/pubsubplus-container/current/mule-pubsubplus-container.xsd
+          http://www.mulesoft.org/schema/mule/solace http://www.mulesoft.org/schema/mule/solace/current/mule-solace.xsd">
+	<pubsubplus-container:config
+		name="containerConfig" />
+
+	<solace:config name="config">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+	<solace:config name="listener-config">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+
+	<solace:config name="listener-setup">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+
+	<solace:config name="client-ack-config"
+		ackMode="MANUAL_CLIENT">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+
+	<solace:config name="completion-ack-config"
+		ackMode="AUTOMATIC_ON_FLOW_COMPLETION">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+
+	<flow name="listen-source-test">
+		<solace:listener-source
+			config-ref="listener-config">
+			<solace:subscriptions>
+				<solace:subscription value="a/>" />
+				<solace:subscription value="b/>" />
+			</solace:subscriptions>
+		</solace:listener-source>
+		<logger message="#[payload]" level="INFO" />
+		<set-variable variableName="msg"
+			value="#[payload == 'hello listener']" />
+		<choice doc:name="Choice">
+			<when expression="#[vars.msg]">
+				<java:invoke-static
+					class="com.solace.connector.mulesoft.SolaceListenerSourceTestCase"
+					method="countDown()">
+				</java:invoke-static>
+			</when>
+			<otherwise>
+				<logger message="Unexpected message payload" level="INFO" />
+			</otherwise>
+		</choice>
+	</flow>
+
+	<flow name="consumer-source-test-queue">
+		<solace:consumer-source
+			config-ref="listener-config" endpoint="Q/consumer-source"
+			endpoint-type="QUEUE" provisionEndpoint="true">
+
+		</solace:consumer-source>
+		<logger message="#[payload]" level="INFO" />
+		<set-variable variableName="msg"
+			value="#[payload == 'hello consumer']" />
+		<choice doc:name="Choice">
+			<when expression="#[vars.msg]">
+				<java:invoke-static
+					class="com.solace.connector.mulesoft.SolaceConsumerSourceTestCase"
+					method="countDown()">
+				</java:invoke-static>
+			</when>
+			<otherwise>
+				<logger message="Unexpected message payload" level="INFO" />
+			</otherwise>
+		</choice>
+	</flow>
+
+	<flow name="consumer-source-test-topic">
+		<solace:consumer-source
+			config-ref="listener-config" endpoint="TPE/consumer-source"
+			endpoint-type="TOPIC" provisionEndpoint="true" subscription="t/consumer-source">
+
+		</solace:consumer-source>
+		<logger message="#[payload]" level="INFO" />
+		<set-variable variableName="msg"
+			value="#[payload == 'hello topic consumer']" />
+		<choice doc:name="Choice">
+			<when expression="#[vars.msg]">
+				<java:invoke-static
+					class="com.solace.connector.mulesoft.SolaceConsumerSourceTestCase"
+					method="countDown()">
+				</java:invoke-static>
+			</when>
+			<otherwise>
+				<logger message="Unexpected message payload" level="INFO" />
+			</otherwise>
+		</choice>
+	</flow>
+ 
+	<flow name="consumer-nack-test">
+		<solace:consumer-source
+			config-ref="client-ack-config" endpoint="Q/consumer-nack"
+			endpoint-type="QUEUE" provisionEndpoint="true">
+
+		</solace:consumer-source>
+		<logger message="#[payload]" level="INFO" />
+		<set-variable variableName="msg"
+			value="#[payload == 'hello consumer']" />
+		<choice doc:name="Choice">
+			<when expression="#[vars.msg]">
+				<java:invoke-static
+					class="com.solace.connector.mulesoft.SolaceConsumerSourceTestCase"
+					method="countDown()">
+				</java:invoke-static>
+			</when>
+			<otherwise>
+				<logger message="Unexpected message payload" level="INFO" />
+			</otherwise>
+		</choice>
+	</flow>
+
+	<flow name="consumer-ack-test">
+		<solace:consumer-source
+			config-ref="client-ack-config" endpoint="Q/consumer-ack"
+			endpoint-type="QUEUE" provisionEndpoint="true">
+
+		</solace:consumer-source>
+		<logger message="#[payload]" level="INFO" />
+		<set-variable variableName="msg"
+			value="#[payload == 'hello consumer']" />
+		<set-variable variableName="msgId"
+			value="#[attributes.messageId]" />
+		<choice doc:name="Choice">
+			<when expression="#[vars.msg]">
+				<java:invoke-static
+					class="com.solace.connector.mulesoft.SolaceConsumerSourceTestCase"
+					method="countDown()">
+				</java:invoke-static>
+				<solace:ack doc:name="Ack" config-ref="client-ack-config"
+					messageId="#[vars.msgId]" />
+			</when>
+			<otherwise>
+				<logger message="Unexpected message payload" level="INFO" />
+			</otherwise>
+		</choice>
+	</flow>
+
+	<flow name="flow-ack-test">
+		<solace:consumer-source
+			config-ref="completion-ack-config" endpoint="Q/flow-ack"
+			endpoint-type="QUEUE" provisionEndpoint="true">
+
+		</solace:consumer-source>
+		<logger message="#[payload]" level="INFO" />
+		<set-variable variableName="msg"
+			value="#[payload == 'hello consumer']" />
+		<choice doc:name="Choice">
+			<when expression="#[vars.msg]">
+				<java:invoke-static
+					class="com.solace.connector.mulesoft.SolaceConsumerSourceTestCase"
+					method="countDown()">
+				</java:invoke-static>
+			</when>
+			<otherwise>
+				<logger message="Unexpected message payload" level="INFO" />
+			</otherwise>
+		</choice>
+	</flow>
+
+	<flow name="publishPersistentToConsumerFlow">
+		<try>
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="Q/consumer-source"
+				endpoint-type="QUEUE" provisionQueue="true">
+				<solace:message>
+					<solace:body>hello consumer</solace:body>
+				</solace:message>
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger message="Publish persistent done." level="INFO" />
+	</flow>
+
+	<flow name="publishPersistentToClientAckFlow">
+		<try>
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="Q/consumer-ack" endpoint-type="QUEUE"
+				provisionQueue="true">
+				<solace:message>
+					<solace:body>hello consumer</solace:body>
+				</solace:message>
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger message="Publish persistent done." level="INFO" />
+	</flow>
+
+	<flow name="publishPersistentToClientNackFlow">
+		<try>
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="Q/consumer-nack" endpoint-type="QUEUE"
+				provisionQueue="true">
+				<solace:message>
+					<solace:body>hello consumer</solace:body>
+				</solace:message>
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger message="Publish persistent done." level="INFO" />
+	</flow>
+	
+	<flow name="publishPersistentToEndAckFlow">
+		<try>
+			<solace:publish-guaranteed
+				config-ref="config" endpoint="Q/flow-ack" endpoint-type="QUEUE"
+				provisionQueue="true">
+				<solace:message>
+					<solace:body>hello consumer</solace:body>
+				</solace:message>
+			</solace:publish-guaranteed>
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger message="Publish persistent done." level="INFO" />
+	</flow>
+
+	<flow name="publishToListener">
+		<solace:publish-direct config-ref="config"
+			topic="a/b/c">
+			<solace:message>
+				<solace:body>hello listener</solace:body>
+			</solace:message>
+		</solace:publish-direct>
+		<solace:publish-guaranteed
+			config-ref="config" endpoint="b/c/d" endpoint-type="TOPIC">
+			<solace:message>
+				<solace:body>hello listener</solace:body>
+			</solace:message>
+		</solace:publish-guaranteed>
+	</flow>
+	<flow name="publishToTopicConsumer">
+		<solace:publish-direct config-ref="config"
+			topic="t/consumer-source">
+			<solace:message>
+				<solace:body>hello topic consumer</solace:body>
+			</solace:message>
+		</solace:publish-direct>
+	</flow>
+
+	<flow name="consumeAckFlow">
+		<try>
+			<logger message="Consume" level="INFO" />
+			<solace:consume config-ref="config"
+				endpoint="Q/consumer-ack" endpoint-type="QUEUE" timeOut="1000"
+				timeUnit="MILLISECONDS" />
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<logger message="Publish-consume done." level="INFO" />
+	</flow>
+	<flow name="consumeEndAckFlow">
+		<try>
+			<logger message="Consume" level="INFO" />
+			<solace:consume config-ref="config"
+				endpoint="Q/flow-ack" endpoint-type="QUEUE" timeOut="1000"
+				timeUnit="MILLISECONDS" />
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<logger message="Publish-consume done." level="INFO" />
+	</flow>
+	<flow name="consumeNackFlow">
+		<try>
+			<logger message="Consume" level="INFO" />
+			<solace:consume config-ref="config"
+				endpoint="Q/consumer-nack" endpoint-type="QUEUE" timeOut="1000"
+				timeUnit="MILLISECONDS" />
+			<error-handler>
+				<on-error-propagate name="propagateHandler">
+					<logger message="An unhandled error has occurred."
+						level="INFO" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+
+		<logger message="Publish-consume done." level="INFO" />
+	</flow>
+
+ 	<!-- consumer source - topic end point test  -->
+	<!-- first listener ensures the endpoint is provisioned -->
+	<flow name="consumer-source-test-noprovision-setup">
+		<solace:consumer-source
+			config-ref="listener-setup" endpoint="TPE/consumer-noprovision"
+			endpoint-type="TOPIC" provisionEndpoint="true" subscription="t/consumer-noprovision">
+
+		</solace:consumer-source>
+		<logger message="#[payload]" level="INFO" />
+	</flow>
+	
+	<!--  second listener - started on demand. binds to pre existing enpoint -->
+	<flow name="consumer-source-test-noprovision" initialState="stopped">
+		<solace:consumer-source
+			config-ref="listener-config" endpoint="TPE/consumer-noprovision"
+			endpoint-type="TOPIC" provisionEndpoint="false" subscription="t/consumer-noprovision">
+
+		</solace:consumer-source>
+		<logger message="#[payload]" level="INFO" />
+		<set-variable variableName="msg"
+			value="#[payload == 'hello topic consumer']" />
+		<choice doc:name="Choice">
+			<when expression="#[vars.msg]">
+				<java:invoke-static
+					class="com.solace.connector.mulesoft.SolaceConsumerSourceTestCase"
+					method="countDown()">
+				</java:invoke-static>
+			</when>
+			<otherwise>
+				<logger message="Unexpected message payload" level="INFO" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="publishToTopicConsumerNoprovision">
+		<solace:publish-direct config-ref="config"
+			topic="t/consumer-noprovision">
+			<solace:message>
+				<solace:body>hello topic consumer</solace:body>
+			</solace:message>
+		</solace:publish-direct>
+	</flow>
+</mule>

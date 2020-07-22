@@ -1,0 +1,107 @@
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:solace="http://www.mulesoft.org/schema/mule/solace"
+	xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:pubsubplus-container="http://www.mulesoft.org/schema/mule/pubsubplus-container"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+      	  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+      	  http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+      	  http://www.mulesoft.org/schema/mule/pubsubplus-container http://www.mulesoft.org/schema/mule/pubsubplus-container/current/mule-pubsubplus-container.xsd
+          http://www.mulesoft.org/schema/mule/solace http://www.mulesoft.org/schema/mule/solace/current/mule-solace.xsd">
+	<pubsubplus-container:config
+		name="containerConfig" />
+
+	<solace:config name="config">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+	<solace:config name="listener-config"
+		ackMode="MANUAL_CLIENT">
+		<solace:connection clientUserName="swen"
+			password="secret" msgVPN="default"
+			brokerHost="${pubsubplus-container::host}"
+			brokerPort="${pubsubplus-container::port}" />
+	</solace:config>
+
+	<flow name="ackSuccessTestFlow"
+		doc:id="17bad2e3-21f4-4a26-800c-85d4881412dc">
+		<solace:publish-guaranteed
+			doc:name="Publish guaranteed"
+			config-ref="config" endpoint="Q/test-mule-1" provisionQueue="true">
+			<solace:message>
+				<solace:body><![CDATA[hello mule]]></solace:body>
+			</solace:message>
+		</solace:publish-guaranteed>
+		<solace:consume doc:name="Consume"
+			config-ref="listener-config" endpoint="Q/test-mule-1" />
+		<logger level="INFO" doc:name="Logger"
+			doc:id="30a33c19-6d2c-43c2-966b-6d9c5228fdaa"
+			message="#[%dw 2.0
+output application/java
+---
+attributes.messageId]" />
+		<logger level="INFO" doc:name="LoggerPayload"
+			message="#[%dw 2.0
+output application/java
+---
+payload]" />
+		<solace:ack doc:name="Ack"
+			config-ref="listener-config"
+			messageId="#[%dw 2.0
+output application/java
+---
+attributes.messageId]" />
+	</flow>
+
+	<flow name="ackTimeoutTestFlow"
+		doc:id="17bad2e3-21f4-4a26-800c-85d4881412dc">
+		<solace:publish-guaranteed
+			doc:name="Publish guaranteed"
+			config-ref="config" endpoint="Q/test-mule-2" provisionQueue="true">
+			<solace:message>
+				<solace:body><![CDATA[hello mule]]></solace:body>
+			</solace:message>
+		</solace:publish-guaranteed>
+		<solace:consume doc:name="Consume"
+			config-ref="listener-config" endpoint="Q/test-mule-2" />
+		<logger level="INFO" doc:name="Logger"
+			doc:id="30a33c19-6d2c-43c2-966b-6d9c5228fdaa"
+			message="#[%dw 2.0
+output application/java
+---
+attributes.messageId]" />
+		<logger level="INFO" doc:name="LoggerPayload"
+			message="#[%dw 2.0
+output application/java
+---
+payload]" />
+		<solace:ack doc:name="Ack"
+			config-ref="listener-config"
+			messageId="#[%dw 2.0
+output application/java
+---
+attributes.messageId]" />
+		<solace:consume doc:name="Consume"
+			config-ref="listener-config" endpoint="Q/test-mule-2" />
+		<logger level="INFO" doc:name="Logger"
+			doc:id="30a33c19-6d2c-43c2-966b-6d9c5228fdaa"
+			message="#[%dw 2.0
+output application/java
+---
+attributes.messageId]" />
+		<logger level="INFO" doc:name="LoggerPayload"
+			message="#[%dw 2.0
+output application/java
+---
+payload]" />
+		<solace:ack doc:name="Ack"
+			config-ref="listener-config"
+			messageId="#[%dw 2.0
+output application/java
+---
+attributes.messageId]" />
+	</flow>
+</mule>

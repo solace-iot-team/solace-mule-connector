@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration shutdownHook="disable">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%-5p %d [%t] %c: %m%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+		<!--  connector classes -->
+        <AsyncLogger name="com.solace.connector.mulesoft" level="DEBUG"/>
+
+        <!-- Mule classes -->
+        <AsyncLogger name="org.mule" level="WARN"/>
+        <AsyncLogger name="org.mule.runtime.core.internal.processor.LoggerMessageProcessor" level="INFO"/>
+        <!--<AsyncLogger name="org.mule.test.runner" level="DEBUG"/>-->
+        <AsyncLogger name="com.mulesoft" level="WARN"/>
+
+        <AsyncRoot level="INFO">
+            <AppenderRef ref="Console"/>
+        </AsyncRoot>
+    </Loggers>
+
+</Configuration>
