@@ -136,6 +136,11 @@ At first it will be attempted to determine the MIME type will from the Mule mess
 | byte[] | BytesMessage |
 | OutputHandler | BytesMessage |
 
+## Consumer and Message Cache
+
+The connector caches consumers and messages for manual acknowledgement and cache entries expire after 10 seconds.
+Using time outs for operations such as `consume` or flow run durations due to slow  downstream systems that lead to execeeding the 10 second expiry may result in errors or other undesirable behaviour.
+
 ## Operations
 
 The connector provides the following operations:
