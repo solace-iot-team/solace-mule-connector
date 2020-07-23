@@ -26,10 +26,10 @@ public class ConsumerCache  {
 			
 	private ScheduledFuture<?> scheduledFuture;
 	private Cache<String, BytesXMLMessage> messageCache = CacheBuilder.newBuilder()
-			.expireAfterWrite(5000, TimeUnit.MILLISECONDS).build();
+			.expireAfterWrite(10000, TimeUnit.MILLISECONDS).build();
 
 	private Cache<String, FlowReceiver> flowReceiverCache = CacheBuilder.newBuilder()
-			.expireAfterWrite(5000, TimeUnit.MILLISECONDS).removalListener(new FlowReceiverRemovalListener()).build();
+			.expireAfterWrite(10000, TimeUnit.MILLISECONDS).removalListener(new FlowReceiverRemovalListener()).build();
 
 	private Set<String> autoProvisionedEndpoints = new HashSet<String>();
 	
