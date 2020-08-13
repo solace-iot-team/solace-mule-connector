@@ -264,7 +264,7 @@ General:
 
 The "subscriptions" configuration can reference a Bean declaring a list of subscriptions or contain an in-line list such as the example below:
 * First select `Edit inline` from the "Subscriptions" drop down list box
-* CLick the `+` icon to add a subscription 
+* Click the `+` icon to add a subscription 
 ![Adding subscriptions inline](./assets/topic_listener_subscriptions.png)
 
 ### OnGuaranteedMessage
