@@ -262,6 +262,11 @@ General:
 * Content Type: MIME type of the message, this is used if the MIME type can't be determined from the message. See Message Types and MIME Types above.
 * Subscriptions: a list of topic subscriptions that will be applied to the source, uses SMF topic subscription syntax.
 
+The "subscriptions" configuration can reference a Bean declaring a list of subscriptions or contain an in-line list such as the example below:
+* First select `Edit inline` from the "Subscriptions" drop down list box
+* CLick the `+` icon to add a subscription 
+![Adding subscriptions inline](./assets/topic_listener_subscriptions.png)
+
 ### OnGuaranteedMessage
 
 Triggered when a guaranteed message is received on a queue or topic endpoint.
