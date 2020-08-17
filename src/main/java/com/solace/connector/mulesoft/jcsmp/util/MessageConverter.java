@@ -152,6 +152,9 @@ public class MessageConverter {
 			encoding = "utf-8";
 		}
 		byte[] bytesPayload = msg.getBytes();
+		if (msg instanceof BytesMessage) {
+			bytesPayload = ((BytesMessage) msg).getData();
+		}
 		if (!StringUtils.isBlank(mediaType))
 			dt = DataType.builder().type(String.class).mediaType(mediaType).charset(encoding).build();
 		else 
