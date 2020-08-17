@@ -57,6 +57,9 @@ public class SolaceMessageProperties implements Serializable{
 
 	private Long sequenceNumber;
 
+	
+	private String contentType;
+	
 	private boolean reply;
 
 	/**
@@ -85,7 +88,22 @@ public class SolaceMessageProperties implements Serializable{
 		this.receiverTimestamp = msg.getReceiveTimestamp();
 		this.sequenceNumber = msg.getSequenceNumber();
 		this.reply = msg.isReplyMessage();
+		this.contentType = msg.getHTTPContentType();
 	}
+	
+	
+
+	public String getContentType() {
+		return contentType;
+	}
+
+
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+
 
 	public boolean isReply() {
 		return reply;
