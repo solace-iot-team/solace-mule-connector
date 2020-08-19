@@ -49,7 +49,7 @@ import com.solace.connector.mulesoft.jcsmp.listeners.ConnectionListenerPropertie
 import com.solace.connector.mulesoft.jcsmp.listeners.ListenerType;
 import com.solacesystems.jcsmp.Message;
 
-@DisplayName("OnGuaranteedMessage")
+@DisplayName("EndpointListener")
 @MediaType(value = ANY, strict = false)
 @Alias("consumer-source")
 @EmitsResponse

@@ -36,7 +36,7 @@ import com.solace.connector.mulesoft.jcsmp.SolaceMessageListener;
 import com.solace.connector.mulesoft.jcsmp.listeners.ConnectionListenerDelegate;
 import com.solace.connector.mulesoft.jcsmp.listeners.ListenerType;
 
-@DisplayName("OnDirectMessage")
+@DisplayName("TopicListener")
 @MediaType(value = ANY, strict = false)
 @Alias("listener-source")
 @EmitsResponse
