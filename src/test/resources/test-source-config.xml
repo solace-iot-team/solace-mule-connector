@@ -74,7 +74,7 @@
 
 	<flow name="consumer-source-test-queue">
 		<solace:consumer-source
-			config-ref="listener-config" endpoint="Q/consumer-source"
+			config-ref="listener-config" address="Q/consumer-source"
 			endpoint-type="QUEUE" provisionEndpoint="true">
 
 		</solace:consumer-source>
@@ -96,7 +96,7 @@
 
 	<flow name="consumer-source-test-topic">
 		<solace:consumer-source
-			config-ref="listener-config" endpoint="TPE/consumer-source"
+			config-ref="listener-config" address="TPE/consumer-source"
 			endpoint-type="TOPIC" provisionEndpoint="true" subscription="t/consumer-source">
 
 		</solace:consumer-source>
@@ -118,7 +118,7 @@
  
 	<flow name="consumer-nack-test">
 		<solace:consumer-source
-			config-ref="client-ack-config" endpoint="Q/consumer-nack"
+			config-ref="client-ack-config" address="Q/consumer-nack"
 			endpoint-type="QUEUE" provisionEndpoint="true">
 
 		</solace:consumer-source>
@@ -140,7 +140,7 @@
 
 	<flow name="consumer-ack-test">
 		<solace:consumer-source
-			config-ref="client-ack-config" endpoint="Q/consumer-ack"
+			config-ref="client-ack-config" address="Q/consumer-ack"
 			endpoint-type="QUEUE" provisionEndpoint="true">
 
 		</solace:consumer-source>
@@ -166,7 +166,7 @@
 
 	<flow name="flow-ack-test">
 		<solace:consumer-source
-			config-ref="completion-ack-config" endpoint="Q/flow-ack"
+			config-ref="completion-ack-config" address="Q/flow-ack"
 			endpoint-type="QUEUE" provisionEndpoint="true">
 
 		</solace:consumer-source>
@@ -188,13 +188,13 @@
 
 	<flow name="publishPersistentToConsumerFlow">
 		<try>
-			<solace:publish-guaranteed
-				config-ref="config" endpoint="Q/consumer-source"
-				endpoint-type="QUEUE" provisionQueue="true">
+			<solace:publish
+				config-ref="config" address="Q/consumer-source"
+				endpoint-type="QUEUE" provisionQueue="true" delivery-mode="PERSISTENT">
 				<solace:message>
 					<solace:body>hello consumer</solace:body>
 				</solace:message>
-			</solace:publish-guaranteed>
+			</solace:publish>
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
 					<logger message="An unhandled error has occurred."
@@ -207,13 +207,13 @@
 
 	<flow name="publishPersistentToClientAckFlow">
 		<try>
-			<solace:publish-guaranteed
-				config-ref="config" endpoint="Q/consumer-ack" endpoint-type="QUEUE"
-				provisionQueue="true">
+			<solace:publish
+				config-ref="config" address="Q/consumer-ack" endpoint-type="QUEUE"
+				provisionQueue="true" delivery-mode="PERSISTENT">
 				<solace:message>
 					<solace:body>hello consumer</solace:body>
 				</solace:message>
-			</solace:publish-guaranteed>
+			</solace:publish>
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
 					<logger message="An unhandled error has occurred."
@@ -226,13 +226,13 @@
 
 	<flow name="publishPersistentToClientNackFlow">
 		<try>
-			<solace:publish-guaranteed
-				config-ref="config" endpoint="Q/consumer-nack" endpoint-type="QUEUE"
-				provisionQueue="true">
+			<solace:publish
+				config-ref="config" address="Q/consumer-nack" endpoint-type="QUEUE"
+				provisionQueue="true" delivery-mode="PERSISTENT">
 				<solace:message>
 					<solace:body>hello consumer</solace:body>
 				</solace:message>
-			</solace:publish-guaranteed>
+			</solace:publish>
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
 					<logger message="An unhandled error has occurred."
@@ -245,13 +245,13 @@
 	
 	<flow name="publishPersistentToEndAckFlow">
 		<try>
-			<solace:publish-guaranteed
-				config-ref="config" endpoint="Q/flow-ack" endpoint-type="QUEUE"
-				provisionQueue="true">
+			<solace:publish
+				config-ref="config" address="Q/flow-ack" endpoint-type="QUEUE"
+				provisionQueue="true" delivery-mode="PERSISTENT">
 				<solace:message>
 					<solace:body>hello consumer</solace:body>
 				</solace:message>
-			</solace:publish-guaranteed>
+			</solace:publish>
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
 					<logger message="An unhandled error has occurred."
@@ -263,33 +263,33 @@
 	</flow>
 
 	<flow name="publishToListener">
-		<solace:publish-direct config-ref="config"
-			topic="a/b/c">
+		<solace:publish config-ref="config"
+			address="a/b/c">
 			<solace:message>
 				<solace:body>hello listener</solace:body>
 			</solace:message>
-		</solace:publish-direct>
-		<solace:publish-guaranteed
-			config-ref="config" endpoint="b/c/d" endpoint-type="TOPIC">
+		</solace:publish>
+		<solace:publish
+			config-ref="config" address="b/c/d" endpoint-type="TOPIC" delivery-mode="PERSISTENT">
 			<solace:message>
 				<solace:body>hello listener</solace:body>
 			</solace:message>
-		</solace:publish-guaranteed>
+		</solace:publish>
 	</flow>
 	<flow name="publishToTopicConsumer">
-		<solace:publish-direct config-ref="config"
-			topic="t/consumer-source">
+		<solace:publish config-ref="config"
+			address="t/consumer-source">
 			<solace:message>
 				<solace:body>hello topic consumer</solace:body>
 			</solace:message>
-		</solace:publish-direct>
+		</solace:publish>
 	</flow>
 
 	<flow name="consumeAckFlow">
 		<try>
 			<logger message="Consume" level="INFO" />
 			<solace:consume config-ref="config"
-				endpoint="Q/consumer-ack" endpoint-type="QUEUE" timeOut="1000"
+				address="Q/consumer-ack" endpoint-type="QUEUE" timeOut="1000"
 				timeUnit="MILLISECONDS" />
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
@@ -305,7 +305,7 @@
 		<try>
 			<logger message="Consume" level="INFO" />
 			<solace:consume config-ref="config"
-				endpoint="Q/flow-ack" endpoint-type="QUEUE" timeOut="1000"
+				address="Q/flow-ack" endpoint-type="QUEUE" timeOut="1000"
 				timeUnit="MILLISECONDS" />
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
@@ -321,7 +321,7 @@
 		<try>
 			<logger message="Consume" level="INFO" />
 			<solace:consume config-ref="config"
-				endpoint="Q/consumer-nack" endpoint-type="QUEUE" timeOut="1000"
+				address="Q/consumer-nack" endpoint-type="QUEUE" timeOut="1000"
 				timeUnit="MILLISECONDS" />
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
@@ -338,7 +338,7 @@
 	<!-- first listener ensures the endpoint is provisioned -->
 	<flow name="consumer-source-test-noprovision-setup">
 		<solace:consumer-source
-			config-ref="listener-setup" endpoint="TPE/consumer-noprovision"
+			config-ref="listener-setup" address="TPE/consumer-noprovision"
 			endpoint-type="TOPIC" provisionEndpoint="true" subscription="t/consumer-noprovision">
 
 		</solace:consumer-source>
@@ -348,7 +348,7 @@
 	<!--  second listener - started on demand. binds to pre existing enpoint -->
 	<flow name="consumer-source-test-noprovision" initialState="stopped">
 		<solace:consumer-source
-			config-ref="listener-config" endpoint="TPE/consumer-noprovision"
+			config-ref="listener-config" address="TPE/consumer-noprovision"
 			endpoint-type="TOPIC" provisionEndpoint="false" subscription="t/consumer-noprovision">
 
 		</solace:consumer-source>
@@ -368,11 +368,11 @@
 		</choice>
 	</flow>
 	<flow name="publishToTopicConsumerNoprovision">
-		<solace:publish-direct config-ref="config"
-			topic="t/consumer-noprovision">
+		<solace:publish config-ref="config"
+			address="t/consumer-noprovision">
 			<solace:message>
 				<solace:body>hello topic consumer</solace:body>
 			</solace:message>
-		</solace:publish-direct>
+		</solace:publish>
 	</flow>
 </mule>

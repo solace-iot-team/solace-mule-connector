@@ -19,19 +19,19 @@
 			brokerPort="${pubsubplus-container::port}" />
 	</solace:config>
 	<flow name="publishTextMsgFlow">
-		<solace:publish-direct config-ref="config"
-			topic="a/b/c">
+		<solace:publish config-ref="config"
+			address="a/b/c">
 			<solace:message>
 				<solace:body>Publish direct</solace:body>
 			</solace:message>
-		</solace:publish-direct>
+		</solace:publish>
 	</flow>
 
 	<flow name="requestReplyDirectTimeoutFlow">
 		<try>
 			<logger message="RR Direct" level="INFO" />
 			<solace:request-reply-direct
-				config-ref="config" topic="request/reply/direct/fails" timeOut="500"
+				config-ref="config" address="request/reply/direct/fails" timeOut="500"
 				timeUnit="MILLISECONDS">
 				<solace:message>
 					<solace:body>hello echo</solace:body>
@@ -54,7 +54,7 @@
 		<try>
 			<logger message="RR Direct" level="INFO" />
 			<solace:request-reply-direct
-				config-ref="config" topic="request/reply/direct/succeeds"
+				config-ref="config" address="request/reply/direct/succeeds"
 				timeOut="20000" timeUnit="MILLISECONDS">
 				<solace:message>
 					<solace:body>hello there</solace:body>
@@ -86,13 +86,13 @@
 		</solace:listener-source>
 		<logger message="Echo flow triggered" level="INFO" />
 		<logger message="#[attributes.replyTo]" level="INFO" />
-		<solace:publish-direct config-ref="config"
-			topic="#[attributes.replyTo]">
+		<solace:publish config-ref="config"
+			address="#[attributes.replyTo]">
 			<solace:message markReply="true"
 				correlationId="#[attributes.correlationId]">
 				<solace:body>hello echo</solace:body>
 			</solace:message>
-		</solace:publish-direct>
+		</solace:publish>
 
 	</flow>
 

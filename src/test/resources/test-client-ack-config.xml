@@ -28,15 +28,15 @@
 
 	<flow name="ackSuccessTestFlow"
 		doc:id="17bad2e3-21f4-4a26-800c-85d4881412dc">
-		<solace:publish-guaranteed
+		<solace:publish
 			doc:name="Publish guaranteed"
-			config-ref="config" endpoint="Q/test-mule-1" provisionQueue="true">
+			config-ref="config" address="Q/test-mule-1" provisionQueue="true" delivery-mode="PERSISTENT" endpoint-type="QUEUE">
 			<solace:message>
 				<solace:body><![CDATA[hello mule]]></solace:body>
 			</solace:message>
-		</solace:publish-guaranteed>
+		</solace:publish>
 		<solace:consume doc:name="Consume"
-			config-ref="listener-config" endpoint="Q/test-mule-1" />
+			config-ref="listener-config" address="Q/test-mule-1" endpoint-type="QUEUE"/>
 		<logger level="INFO" doc:name="Logger"
 			doc:id="30a33c19-6d2c-43c2-966b-6d9c5228fdaa"
 			message="#[%dw 2.0
@@ -58,15 +58,15 @@ attributes.messageId]" />
 
 	<flow name="ackTimeoutTestFlow"
 		doc:id="17bad2e3-21f4-4a26-800c-85d4881412dc">
-		<solace:publish-guaranteed
+		<solace:publish
 			doc:name="Publish guaranteed"
-			config-ref="config" endpoint="Q/test-mule-2" provisionQueue="true">
+			config-ref="config" address="Q/test-mule-2" provisionQueue="true" delivery-mode="PERSISTENT" endpoint-type="QUEUE">
 			<solace:message>
 				<solace:body><![CDATA[hello mule]]></solace:body>
 			</solace:message>
-		</solace:publish-guaranteed>
+		</solace:publish>
 		<solace:consume doc:name="Consume"
-			config-ref="listener-config" endpoint="Q/test-mule-2" />
+			config-ref="listener-config" address="Q/test-mule-2"  endpoint-type="QUEUE"/>
 		<logger level="INFO" doc:name="Logger"
 			doc:id="30a33c19-6d2c-43c2-966b-6d9c5228fdaa"
 			message="#[%dw 2.0
@@ -85,7 +85,7 @@ output application/java
 ---
 attributes.messageId]" />
 		<solace:consume doc:name="Consume"
-			config-ref="listener-config" endpoint="Q/test-mule-2" />
+			config-ref="listener-config" address="Q/test-mule-2" endpoint-type="QUEUE"/>
 		<logger level="INFO" doc:name="Logger"
 			doc:id="30a33c19-6d2c-43c2-966b-6d9c5228fdaa"
 			message="#[%dw 2.0
