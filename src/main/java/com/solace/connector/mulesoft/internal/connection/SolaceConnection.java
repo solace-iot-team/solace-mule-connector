@@ -220,43 +220,29 @@ public final class SolaceConnection {
 		return !session.isClosed();
 	}
 
-	/**
-	 * Publish a direct message
-	 * 
-	 * @param topic
-	 * @param payload
-	 * @param correlationId
-	 * @param markReply
-	 */
-	public void publishDirect(String topic, TypedValue<Object> payload, String encoding, String contentType, String correlationId,
-			boolean markReply) {
-		Destination queryResponseTopic;
-		queryResponseTopic = JCSMPFactory.onlyInstance().createTopic(topic);
+	public void publish(SolaceEndpointType endpointType, String endpoint, boolean provisionQueue,
+			DeliveryMode deliveryMode, String correlationId, boolean markReply, TypedValue<Object> payload,
+			String encoding, String contentType, CompletionCallback<Void, Void> callback) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug(String.format(
+					"endpointType=%s, endpoint=%s, provisionQueue=%s, deliveryMode=%s, correlationId=%s, markReply=%s, encoding=%s, contentType=%s",
+					endpointType, endpoint, provisionQueue, deliveryMode, correlationId, markReply, encoding,
+					contentType));
+		}
+		final Destination endpointDestination;
 		Message msg = null;
 		try {
 			msg = messageConverter.convertObjectToMessage(payload, encoding, contentType);
 		} catch (SDTException msgException) {
 			ModuleException generic = new ModuleException(SolaceConnectorError.GENERIC_ERROR, msgException);
-			LOGGER.error(String.format("Error creating message on topic [%s]", topic));
+			LOGGER.error(String.format("Error creating message on endpoint [%s]", endpoint));
 			throw generic;
 		}
-		if (correlationId != null && !correlationId.isEmpty()) {
-			msg.setCorrelationId(correlationId);
-		}
-		msg.setAsReplyMessage(markReply);
-		try {
-			producer.send(msg, queryResponseTopic);
-		} catch (JCSMPException e) {
-			LOGGER.error("Error sending reply.", e);
-		}
+		msg.setDeliveryMode(deliveryMode);
 
-	}
-
-	public void publishGuaranteed(SolaceEndpointType endpointType, String endpoint, boolean provisionQueue,
-			TypedValue<Object> payload, String encoding, String contentType, CompletionCallback<Void, Void> callback) {
-		final Destination endpointDestination;
 		if (endpointType.equals(SolaceEndpointType.QUEUE)) {
 			endpointDestination = JCSMPFactory.onlyInstance().createQueue(endpoint);
+			msg.setDeliveryMode(DeliveryMode.PERSISTENT);
 			if (provisionQueue && !consumerCache.hasEndpoint(endpoint)) {
 				EndpointProperties endpointProps = new EndpointProperties();
 				endpointProps.setAccessType(EndpointProperties.ACCESSTYPE_EXCLUSIVE);
@@ -271,26 +257,27 @@ public final class SolaceConnection {
 			endpointDestination = JCSMPFactory.onlyInstance().createTopic(endpoint);
 		}
 
-		Message msg = null;
-		try {
-			msg = messageConverter.convertObjectToMessage(payload, encoding, contentType);
-		} catch (SDTException msgException) {
-			ModuleException generic = new ModuleException(SolaceConnectorError.GENERIC_ERROR, msgException);
-			LOGGER.error(String.format("Error creating message on endpoint [%s]", endpoint));
-			throw generic;
+		if (correlationId != null && !correlationId.isEmpty()) {
+			msg.setCorrelationId(correlationId);
 		}
-		msg.setDeliveryMode(DeliveryMode.PERSISTENT);
-
-		String persistentMessageId = UUID.randomUUID().toString();
-		msg.setCorrelationKey(persistentMessageId);
-		this.streamingPublishEventHandler.registerCallback(persistentMessageId, callback);
+		msg.setAsReplyMessage(markReply);
+		if (DeliveryMode.PERSISTENT.equals(deliveryMode)) {
+			String persistentMessageId = UUID.randomUUID().toString();
+			msg.setCorrelationKey(persistentMessageId);
+			this.streamingPublishEventHandler.registerCallback(persistentMessageId, callback);
+		}
 		try {
+			LOGGER.debug("Publishing to " + endpointDestination.getName());
 			this.producer.send(msg, endpointDestination);
 		} catch (JCSMPException e) {
-			LOGGER.error("Error sending reply.", e);
+			LOGGER.error("Error publishing.", e);
 			ModuleException generic = new ModuleException(SolaceConnectorError.GENERIC_ERROR, e);
 			LOGGER.error(String.format("Error sending message on endpoint [%s]", endpoint));
 			throw generic;
+		} finally {
+			if (DeliveryMode.DIRECT.equals(deliveryMode)) {
+				callback.success(Result.<Void, Void>builder().output(null).attributes(null).build());
+			}
 		}
 
 	}
@@ -335,8 +322,9 @@ public final class SolaceConnection {
 	}
 
 	public Result<TypedValue<Object>, SolaceMessageProperties> requestReplyPersistent(SolaceEndpointType endpointType,
-			String endpoint, boolean provisionQueue, TypedValue<Object> message, String encoding, String contentType, int timeOutMillis,
-			ConsumerAcknowledgementConfiguration consumerAcknowledgementConfiguration, SolaceAccessType accessType) {
+			String endpoint, boolean provisionQueue, TypedValue<Object> message, String encoding, String contentType,
+			int timeOutMillis, ConsumerAcknowledgementConfiguration consumerAcknowledgementConfiguration,
+			SolaceAccessType accessType) {
 		Destination requestDestination = EndpointUtil.mapToGuaranteedProducerDestination(endpointType, endpoint);
 
 		Queue replyQueue;

@@ -10,7 +10,7 @@ import com.solace.connector.mulesoft.api.SolaceConnectorError;
 /**
 * Lists the errors that can be raised by operations that involve publishing of guaranteed messages
 */
-public class PublishPersistentErrorProvider implements ErrorTypeProvider {
+public class PublishErrorProvider implements ErrorTypeProvider {
     @SuppressWarnings("rawtypes")
 	@Override
     public Set<ErrorTypeDefinition> getErrorTypes() {

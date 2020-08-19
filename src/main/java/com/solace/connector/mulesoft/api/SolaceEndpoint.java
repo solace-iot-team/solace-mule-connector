@@ -12,7 +12,7 @@ import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 public class SolaceEndpoint {
 	
 	@Parameter
-	@Alias("endpoint")
+	@Alias("address")
 	@DisplayName("Name")
 	String endpointName;
 
@@ -20,7 +20,7 @@ public class SolaceEndpoint {
 	@Parameter
 	@Alias("endpoint-type")
 	@DisplayName("Type")
-	@Optional(defaultValue="QUEUE")
+	@Optional(defaultValue="TOPIC")
 	SolaceEndpointType endpointType;
 
 

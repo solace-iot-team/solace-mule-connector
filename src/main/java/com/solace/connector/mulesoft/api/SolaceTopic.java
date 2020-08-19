@@ -4,7 +4,7 @@ import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 
 public class SolaceTopic {
-	@Alias("topic")
+	@Alias("address")
 	@Parameter
 	private String topic;
 

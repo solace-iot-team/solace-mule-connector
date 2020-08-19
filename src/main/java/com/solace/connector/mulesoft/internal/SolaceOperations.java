@@ -16,6 +16,7 @@ import org.mule.runtime.extension.api.runtime.process.CompletionCallback;
 
 import com.solace.connector.mulesoft.api.SolaceAckMode;
 import com.solace.connector.mulesoft.api.SolaceConsumerEndpoint;
+import com.solace.connector.mulesoft.api.SolaceDeliveryMode;
 import com.solace.connector.mulesoft.api.SolaceEndpoint;
 import com.solace.connector.mulesoft.api.SolaceMessage;
 import com.solace.connector.mulesoft.api.SolaceMessageProperties;
@@ -33,30 +34,9 @@ import com.solace.connector.mulesoft.internal.connection.SolaceConnection;
 @MetadataScope(outputResolver = SolaceOutputResolver.class)
 public class SolaceOperations {
 
-	/**
-	 * operation to publish Direct messages
-	 * 
-	 * @param configuration
-	 * @param connection
-	 * @param topic
-	 * @param message
-	 * @param encoding
-	 * @param correlationId
-	 * @param markReply
-	 * @param callback
-	 */
-	@Alias("publishDirect")
-	public void publishDirect(@Config SolaceConfiguration configuration, @Connection SolaceConnection connection,
-			@ParameterGroup(name = "Topic") SolaceTopic topic,
-			@ParameterGroup(showInDsl = true, name = "Message") SolaceMessage message,
-			CompletionCallback<Void, Void> callback) {
-		connection.publishDirect(topic.getTopic(), message.getBody(), message.getEncoding(), message.getContentType(), message.getCorrelationId(),
-				message.isMarkReply());
-		callback.success(Result.<Void, Void>builder().output(null).attributes(null).build());
-	}
 
 	/**
-	 * operation to publish Persistent messages
+	 * operation to publish  messages
 	 * 
 	 * @param configuration
 	 * @param connection
@@ -65,14 +45,15 @@ public class SolaceOperations {
 	 * @param message
 	 * @param callback
 	 */
-	@Throws(PublishPersistentErrorProvider.class)
-	@Alias("publishGuaranteed")
-	public void publishPersistent(@Config SolaceConfiguration configuration, @Connection SolaceConnection connection,
-			@ParameterGroup(name = "Endpoint") SolaceEndpoint endpoint,
+	@Throws(PublishErrorProvider.class)
+	@Alias("publish")
+	public void publish(@Config SolaceConfiguration configuration, @Connection SolaceConnection connection,
+			@ParameterGroup(name = "Destination") SolaceEndpoint endpoint, @Alias("delivery-mode") @Optional(defaultValue = "DIRECT") SolaceDeliveryMode deliveryMode,
 			@Alias("provisionQueue") @Expression(ExpressionSupport.NOT_SUPPORTED) @Optional(defaultValue = "false") @Placement(order = 1, tab = "Advanced") boolean provisionQueue,
 			@ParameterGroup(showInDsl = true, name = "Message") SolaceMessage message,
 			CompletionCallback<Void, Void> callback) {
-		connection.publishGuaranteed(endpoint.getEndpointType(), endpoint.getEndpointName(), provisionQueue,
+		
+		connection.publish(endpoint.getEndpointType(), endpoint.getEndpointName(), provisionQueue,deliveryMode.toSolaceDeliveryMode(deliveryMode), message.getCorrelationId(), message.isMarkReply(),
 				message.getBody(), message.getEncoding(), message.getContentType(), callback);
 	}
 
@@ -117,7 +98,7 @@ public class SolaceOperations {
 	@Throws(OperationsErrorProvider.class)
 	public Result<TypedValue<Object>, SolaceMessageProperties> requestReplyDirect(
 			@Config SolaceConfiguration configuration, @Connection SolaceConnection connection,
-			@ParameterGroup(name = "Topic") SolaceTopic topic,
+			@ParameterGroup(name = "Topic")  SolaceTopic topic,
 			@ParameterGroup(showInDsl = true, name = "Message") SolaceMessage message,
 			@ParameterGroup(name = "Time Out") TimeOut timeOut) {
 		int timeOutMillis = timeOut.getMillis();
