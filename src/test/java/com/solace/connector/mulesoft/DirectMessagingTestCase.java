@@ -1,8 +1,6 @@
 package com.solace.connector.mulesoft;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -11,6 +9,7 @@ import org.mule.functional.api.flow.FlowRunner;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class DirectMessagingTestCase extends SolaceConnectorTestBaseClass {
 
