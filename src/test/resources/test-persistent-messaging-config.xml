@@ -191,13 +191,13 @@
 	<flow name="requestReplyGuaranteedSuccessFlow">
 		<try>
 			<logger message="RR Guaranteed" level="INFO" />
-			<solace:request-reply-guaranteed
+			<solace:request-reply
 				config-ref="config" address="Q/request-reply-q"
 				endpoint-type="QUEUE" timeOut="2000" timeUnit="MILLISECONDS">
 				<solace:message>
 					<solace:body>hello guaranteed</solace:body>
 				</solace:message>
-			</solace:request-reply-guaranteed>
+			</solace:request-reply>
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
 					<logger message="An unhandled error has occurred."

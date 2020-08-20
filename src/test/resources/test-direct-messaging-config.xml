@@ -30,14 +30,14 @@
 	<flow name="requestReplyDirectTimeoutFlow">
 		<try>
 			<logger message="RR Direct" level="INFO" />
-			<solace:request-reply-direct
+			<solace:request-reply
 				config-ref="config" address="request/reply/direct/fails" timeOut="500"
 				timeUnit="MILLISECONDS">
 				<solace:message>
 					<solace:body>hello echo</solace:body>
 				</solace:message>
 
-			</solace:request-reply-direct>
+			</solace:request-reply>
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
 					<logger message="An unhandled error has occurred."
@@ -53,13 +53,13 @@
 	<flow name="requestReplyDirectSuccessFlow">
 		<try>
 			<logger message="RR Direct" level="INFO" />
-			<solace:request-reply-direct
+			<solace:request-reply
 				config-ref="config" address="request/reply/direct/succeeds"
 				timeOut="20000" timeUnit="MILLISECONDS">
 				<solace:message>
 					<solace:body>hello there</solace:body>
 				</solace:message>
-			</solace:request-reply-direct>
+			</solace:request-reply>
 			<error-handler>
 				<on-error-propagate name="propagateHandler">
 					<logger message="An unhandled error has occurred."
