@@ -175,24 +175,15 @@ The metadata of received messages is exposed in message properties:
 * senderTimestamp: time stamp of message set by sender
 * sequenceNumber: sequence number of message
 
-### Publish Direct
+### Publish 
 
-Sends a direct message to a Solace topic.
-
-General
-* Topic: specify the topic
-* Message:
-    * See common elements section
-
-
-### Publish Guaranteed
-
-Sends a guaranteed message to a Solace broker.
+Sends a direct or persistent message to a Solace broker.
 
 General
+* Delivery Mode: DIRECT or PERSISTENT
 * Endpoint: specify the endpoint
     * Name: of the queue or topic
-    * Type: queue or topic
+    * Type: queue or topic, if endpoint type is QUEUE the delivery mode used is PERSISTENT
 * Message:
     * See common elements section
 
@@ -217,26 +208,16 @@ General:
     * Time out: time to wait for a message
     * Time out interval: interval time unit
 
-### Request-Reply Direct
-
-Blocking operation sends a direct message to a topic and waits for a response on the reply-to topic automatically specified by the sender.
-Throws a SOLACE.REQUEST_TIME_OUT exception if no response was received.
-
-General
-* Topic: specify the topic to send the request to
-* Message:
-    * See common elements section
-
-
-### Request-Reply Guaranteed
+### Request-Reply 
 
 Blocking operation sends a guaranteed message to a queue or topic and waits for a response on the reply-to temporary queue automatically created by the sender.
 Throws a SOLACE.REQUEST_TIME_OUT exception if no response was received.
 
 General:
+* Delivery Mode: DIRECT or PERSISTENT
 * Endpoint:
     * Name: name of the queue or topic
-    * Type: queue or topic 
+    * Type: queue or topic, if endpoint type is QUEUE the delivery mode used is PERSISTENT
 * Message:
     * See common elements section
 
@@ -254,7 +235,7 @@ The connector provides two listeners that trigger flows on receipt of a message:
 * OnDirectMessage: triggered when a direct message is received on a set of topic subscriptions.
 * OnGuaranteedMessage: triggered when a guaranteed message is received on a queue or topic endpoint.
 
-### OnDirectMessage
+### TopicListener
 
 Triggered when a direct message is received on a set of topic subscriptions.
 
@@ -267,7 +248,7 @@ The "subscriptions" configuration can reference a Bean declaring a list of subsc
 * Click the `+` icon to add a subscription 
 ![Adding subscriptions inline](./assets/topic_listener_subscriptions.png)
 
-### OnGuaranteedMessage
+### EndpointListener
 
 Triggered when a guaranteed message is received on a queue or topic endpoint.
 
