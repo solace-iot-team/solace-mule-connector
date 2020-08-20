@@ -309,18 +309,6 @@ public final class SolaceConnection {
 		}
 	}
 
-	private void handleTimeOutException(JCSMPException e) {
-		if (e instanceof JCSMPRequestTimeoutException) {
-			LOGGER.error("Timeout in request/reply.", e);
-			ModuleException generic = new ModuleException(SolaceConnectorError.REQUEST_TIME_OUT, e);
-			throw generic;
-		} else {
-			LOGGER.error("Error in request/reply.", e);
-			ModuleException generic = new ModuleException(SolaceConnectorError.GENERIC_ERROR, e);
-			throw generic;
-		}
-	}
-
 	public Result<TypedValue<Object>, SolaceMessageProperties> requestReplyPersistent(SolaceEndpointType endpointType,
 			String endpoint, boolean provisionQueue, TypedValue<Object> message, String encoding, String contentType,
 			int timeOutMillis, ConsumerAcknowledgementConfiguration consumerAcknowledgementConfiguration,
@@ -362,6 +350,17 @@ public final class SolaceConnection {
 		}
 	}
 
+	private void handleTimeOutException(JCSMPException e) {
+		if (e instanceof JCSMPRequestTimeoutException) {
+			LOGGER.error("Timeout in request/reply.", e);
+			ModuleException generic = new ModuleException(SolaceConnectorError.REQUEST_TIME_OUT, e);
+			throw generic;
+		} else {
+			LOGGER.error("Error in request/reply.", e);
+			ModuleException generic = new ModuleException(SolaceConnectorError.GENERIC_ERROR, e);
+			throw generic;
+		}
+	}	
 	/**
 	 * 
 	 * @param endpointType
