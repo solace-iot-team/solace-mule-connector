@@ -44,7 +44,7 @@ Add the connector dependency to your project's pom.xml file
 <dependency>
 	<groupId>com.solace.connector</groupId>
 	<artifactId>solace-mulesoft-connector</artifactId>
-	<version>0.3.2-SNAPSHOT</version>
+	<version>0.3.3-SNAPSHOT</version>
 	<classifier>mule-plugin</classifier>
 </dependency>
 ```
