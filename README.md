@@ -1,9 +1,15 @@
-# Solace PubSub+ Connector for Mulesoft
+# Solace PubSub+ Connector for Mulesoft - DEPRECATED
+
+## Notice
+**There is now an official Solace Mulesoft Connector in Early Access.**
+**You can request access in the Solace Community - https://solace.community/group/3-solace-early-access-mulesoft-connector**
+
+**This connector version will no longer be actively maintained apart from critical bug fixes.**
+**The recommendation is to migrate to the official connector that will eventually be available and supported via Mulesoft Exchange**
 
 ## What is the Connector?
 
 Integrate any Solace PubSub+ broker with SaaS and other applications with a native Solace connector, which is based on the JCSMP Java API.
-
 Read through this user guide to understand how to install the connector and use it to interact with the Solace broker.
 
 ## Prerequisites
